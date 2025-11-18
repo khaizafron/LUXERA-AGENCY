@@ -1,59 +1,64 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
-import Link from "next/link"
-import { loginUser } from "@/lib/auth"
-import { toast } from "sonner"
-import { motion } from "framer-motion"
-import { useSession } from "@/lib/auth-client"
-import { GradientButton } from "@/components/ui/gradient-button"
-import { Loader2 } from "lucide-react"
+import { useEffect, useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { loginUser } from "@/lib/auth";
+import { toast } from "sonner";
+import { motion } from "framer-motion";
+import { useSession } from "@/lib/auth-client";
+import { GradientButton } from "@/components/ui/gradient-button";
+import { Loader2 } from "lucide-react";
 
-export default function LoginPage() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const { data: session, isPending, refetch } = useSession()
+/**
+ * We wrap the parts using useSearchParams() in a Suspense boundary.
+ * This prevents Next.js from crashing during prerender.
+ */
+function LoginPageContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
-  const [isLoading, setIsLoading] = useState(false)
+  const { data: session, isPending, refetch } = useSession();
+
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    rememberMe: false
-  })
+    rememberMe: false,
+  });
 
   // Redirect if already logged in
   useEffect(() => {
-    if (!isPending && session?.user) router.push("/dashboard")
-  }, [session, isPending, router])
+    if (!isPending && session?.user) router.push("/dashboard");
+  }, [session, isPending, router]);
 
   // Registration success toast
   useEffect(() => {
     if (searchParams.get("registered") === "true") {
-      toast.success("Account created! Please login.")
+      toast.success("Account created! Please login.");
     }
-  }, [searchParams])
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
+    e.preventDefault();
+    setIsLoading(true);
 
     const result = await loginUser({
       email: formData.email,
-      password: formData.password
-    })
+      password: formData.password,
+    });
 
-    setIsLoading(false)
+    setIsLoading(false);
 
     if (result.error || !result.data) {
-      toast.error(result.error ?? "Invalid email or password")
-      return
+      toast.error(result.error ?? "Invalid email or password");
+      return;
     }
 
-    toast.success("Login successful!")
-    await refetch()
-    router.push("/dashboard")
-  }
+    toast.success("Login successful!");
+    await refetch();
+    router.push("/dashboard");
+  };
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center p-4 relative overflow-hidden">
@@ -86,7 +91,9 @@ export default function LoginPage() {
                 type="email"
                 required
                 value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
                 className="w-full px-4 py-3 bg-black/40 border border-white/10 rounded-lg text-white"
               />
             </div>
@@ -97,7 +104,9 @@ export default function LoginPage() {
                 type="password"
                 required
                 value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, password: e.target.value })
+                }
                 className="w-full px-4 py-3 bg-black/40 border border-white/10 rounded-lg text-white"
               />
             </div>
@@ -137,5 +146,13 @@ export default function LoginPage() {
         </div>
       </motion.div>
     </div>
-  )
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="text-white p-8">Loading...</div>}>
+      <LoginPageContent />
+    </Suspense>
+  );
 }
