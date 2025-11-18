@@ -1,31 +1,16 @@
-import path from "node:path";
-import Database from "better-sqlite3";
-import {
-  drizzle,
-  type BetterSQLite3Database,
-} from "drizzle-orm/better-sqlite3";
-
+import { drizzle } from "drizzle-orm/neon-http";
+import { neon } from "@neondatabase/serverless";
 import * as schema from "./schema";
 
-type DbInstance = BetterSQLite3Database<typeof schema>;
-
-declare global {
-  // eslint-disable-next-line no-var
-  var __drizzleDb: DbInstance | undefined;
+// Ensure DATABASE_URL exists
+if (!process.env.DATABASE_URL) {
+  throw new Error("❌ DATABASE_URL is missing. Set it in Railway environment variables.");
 }
 
-const defaultDbPath = path.resolve(process.cwd(), "luxera.db");
-const databaseUrl = process.env.DATABASE_URL ?? `file:${defaultDbPath}`;
-const sqlitePath = databaseUrl.replace(/^file:/i, "");
+// Create Neon HTTP client
+const sql = neon(process.env.DATABASE_URL);
 
-function createDrizzleDb(): DbInstance {
-  const sqlite = new Database(sqlitePath);
-  return drizzle(sqlite, { schema });
-}
-
-export const db: DbInstance =
-  globalThis.__drizzleDb ?? createDrizzleDb();
-
-if (process.env.NODE_ENV !== "production") {
-  globalThis.__drizzleDb = db;
-}
+// Create Drizzle database instance
+export const db = drizzle(sql, {
+  schema,
+});

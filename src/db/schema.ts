@@ -1,90 +1,117 @@
 import {
-  sqliteTable,
-  integer,
+  pgTable,
+  serial,
   text,
+  varchar,
+  integer,
+  timestamp,
   uniqueIndex,
-} from "drizzle-orm/sqlite-core";
+  jsonb,
+} from "drizzle-orm/pg-core";
 
 /* ---------------------- USERS TABLE ------------------------------- */
-export const user = sqliteTable(
+export const user = pgTable(
   "user",
   {
-    id: text("id").primaryKey(),
-    name: text("name").notNull(),
-    email: text("email").notNull(),
-    emailVerified: text("email_verified"),
+    id: varchar("id", { length: 255 }).primaryKey(),
+    name: varchar("name", { length: 255 }).notNull(),
+    email: varchar("email", { length: 255 }).notNull(),
+    emailVerified: timestamp("email_verified", { mode: "string" }),
     image: text("image"),
     passwordHash: text("password_hash").notNull(),
-    createdAt: text("created_at").notNull(),
-    updatedAt: text("updated_at").notNull(),
+    createdAt: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow().notNull(),
   },
   (table) => ({
     emailIdx: uniqueIndex("user_email_unique").on(table.email),
-  }),
+  })
 );
 
 /* ---------------------- CONTACT FORM TABLE ---------------------- */
-export const contacts = sqliteTable("contacts", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  name: text("name").notNull(),
-  email: text("email").notNull(),
-  company: text("company"),
+export const contacts = pgTable("contacts", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  email: varchar("email", { length: 255 }).notNull(),
+  company: varchar("company", { length: 255 }),
   message: text("message").notNull(),
-  createdAt: text("created_at").notNull(),
+  createdAt: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
 });
 
 /* ---------------------- SUBSCRIPTION PLANS ---------------------- */
-export const subscriptionPlans = sqliteTable("subscription_plans", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  name: text("name").notNull(),
+export const subscriptionPlans = pgTable("subscription_plans", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
   price: integer("price").notNull(),
-  features: text("features").notNull(), // store JSON string
-  createdAt: text("created_at").notNull(),
+  features: jsonb("features").notNull(), // store JSON structure properly (not string)
+  createdAt: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
 });
 
 /* ---------------------- SERVICES TABLE --------------------------- */
-export const services = sqliteTable("services", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  name: text("name").notNull(),
+export const services = pgTable("services", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
   description: text("description").notNull(),
-  category: text("category").notNull(),
-  icon: text("icon"),
+  category: varchar("category", { length: 255 }).notNull(),
+  icon: varchar("icon", { length: 255 }),
   monthlyLimit: integer("monthly_limit").notNull(),
-  createdAt: text("created_at").notNull(),
+  createdAt: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
 });
 
 /* ---------------------- USER SUBSCRIPTIONS ----------------------- */
-export const userSubscriptions = sqliteTable("user_subscriptions", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  userId: text("user_id").notNull(),
-  planId: integer("plan_id").notNull(),
-  status: text("status").notNull(),
-  startedAt: text("started_at").notNull(),
-  endsAt: text("ends_at"),
-  createdAt: text("created_at").notNull(),
+export const userSubscriptions = pgTable("user_subscriptions", {
+  id: serial("id").primaryKey(),
+
+  userId: varchar("user_id", { length: 255 })
+    .notNull()
+    .references(() => user.id),
+
+  planId: integer("plan_id")
+    .notNull()
+    .references(() => subscriptionPlans.id),
+
+  status: varchar("status", { length: 50 }).notNull(),
+
+  startedAt: timestamp("started_at", { mode: "string" }).defaultNow().notNull(),
+  endsAt: timestamp("ends_at", { mode: "string" }),
+  createdAt: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
 });
 
 /* ---------------------- USAGE LOGS ------------------------------- */
-export const usageLogs = sqliteTable("usage_logs", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  userId: text("user_id").notNull(),
-  serviceId: integer("service_id").notNull(),
+export const usageLogs = pgTable("usage_logs", {
+  id: serial("id").primaryKey(),
+
+  userId: varchar("user_id", { length: 255 })
+    .notNull()
+    .references(() => user.id),
+
+  serviceId: integer("service_id")
+    .notNull()
+    .references(() => services.id),
+
   usageCount: integer("usage_count").notNull(),
-  month: text("month").notNull(),
-  createdAt: text("created_at").notNull(),
-  updatedAt: text("updated_at").notNull(),
+
+  month: varchar("month", { length: 20 }).notNull(),
+
+  createdAt: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow().notNull(),
 });
 
-export const sessions = sqliteTable(
+/* ---------------------- SESSIONS TABLE --------------------------- */
+export const sessions = pgTable(
   "sessions",
   {
-    id: text("id").primaryKey(),
-    userId: text("user_id").notNull(),
-    token: text("token").notNull(),
-    createdAt: text("created_at").notNull(),
-    expiresAt: text("expires_at").notNull(),
+    id: varchar("id", { length: 255 }).primaryKey(),
+
+    userId: varchar("user_id", { length: 255 })
+      .notNull()
+      .references(() => user.id),
+
+    token: varchar("token", { length: 255 }).notNull(),
+
+    createdAt: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
+    expiresAt: timestamp("expires_at", { mode: "string" }).notNull(),
   },
   (table) => ({
     tokenIdx: uniqueIndex("sessions_token_unique").on(table.token),
-  }),
+  })
 );
