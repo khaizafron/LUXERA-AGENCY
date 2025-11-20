@@ -1,16 +1,13 @@
-import { drizzle } from "drizzle-orm/neon-http";
-import { neon } from "@neondatabase/serverless";
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
+
 import * as schema from "./schema";
 
-// Ensure DATABASE_URL exists
-if (!process.env.DATABASE_URL) {
-  throw new Error("❌ DATABASE_URL is missing. Set it in Railway environment variables.");
-}
+const connectionString = process.env.DATABASE_URL!;
 
-// Create Neon HTTP client
-const sql = neon(process.env.DATABASE_URL);
-
-// Create Drizzle database instance
-export const db = drizzle(sql, {
-  schema,
+// required for Supabase SSL
+const client = postgres(connectionString, {
+  ssl: "require",
 });
+
+export const db = drizzle(client, { schema });
