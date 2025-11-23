@@ -9,11 +9,8 @@ import { motion } from "framer-motion";
 import { useSession } from "@/lib/auth-client";
 import { GradientButton } from "@/components/ui/gradient-button";
 import { Loader2 } from "lucide-react";
+import ShaderBackground from "@/components/ui/shader-background";
 
-/**
- * We wrap the parts using useSearchParams() in a Suspense boundary.
- * This prevents Next.js from crashing during prerender.
- */
 function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -24,15 +21,12 @@ function LoginPageContent() {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    rememberMe: false,
   });
 
-  // Redirect if already logged in
   useEffect(() => {
     if (!isPending && session?.user) router.push("/dashboard");
   }, [session, isPending, router]);
 
-  // Registration success toast
   useEffect(() => {
     if (searchParams.get("registered") === "true") {
       toast.success("Account created! Please login.");
@@ -61,21 +55,17 @@ function LoginPageContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center p-4 relative overflow-hidden">
-      {/* BG */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-      </div>
+    <div className="fixed inset-0 w-screen h-screen flex items-center justify-center overflow-hidden bg-transparent">
+
+      <ShaderBackground />
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="relative z-10 w-full max-w-md"
+        className="relative z-10 w-full max-w-md px-4"
       >
-        <div className="glassmorphism p-8 rounded-2xl border border-white/10">
-          {/* Header */}
+        <div className="glassmorphism p-8 rounded-2xl border border-white/10 backdrop-blur-xl bg-black/30">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold mb-2">
               Welcome to <span className="neon-gradient-text">LUXERA</span>
@@ -83,10 +73,11 @@ function LoginPageContent() {
             <p className="text-gray-400">Sign in to access your dashboard</p>
           </div>
 
-          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="text-sm text-gray-300 mb-2 block">Email Address</label>
+              <label className="text-sm text-gray-300 mb-2 block">
+                Email Address
+              </label>
               <input
                 type="email"
                 required
@@ -99,7 +90,9 @@ function LoginPageContent() {
             </div>
 
             <div>
-              <label className="text-sm text-gray-300 mb-2 block">Password</label>
+              <label className="text-sm text-gray-300 mb-2 block">
+                Password
+              </label>
               <input
                 type="password"
                 required
@@ -111,10 +104,8 @@ function LoginPageContent() {
               />
             </div>
 
-            {/* 🔵 Gradient Sign In Button */}
             <GradientButton
               type="submit"
-              variant="variant"
               disabled={isLoading}
               className="w-full h-12 text-lg font-semibold flex items-center justify-center gap-3"
             >
