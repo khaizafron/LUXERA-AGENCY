@@ -46,6 +46,7 @@
         "@react-three/drei": "^10.7.7",
         "@react-three/fiber": "^9.4.0",
         "@react-three/postprocessing": "^3.0.4",
+        "@splinetool/react-spline": "^4.1.0",
         "@supabase/supabase-js": "^2.80.0",
         "@tabler/icons-react": "^3.35.0",
         "@tailwindcss/typography": "^0.5.19",
