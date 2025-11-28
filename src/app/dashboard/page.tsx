@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
 import { motion } from "framer-motion";
+import { buttonVariants, NeonButton } from "@/components/ui/neon-button";
 import {
   Activity,
   MessageSquare,
@@ -357,14 +358,14 @@ export default function DashboardPage() {
             className="flex items-center gap-4"
           >
             {/* Back to Home Button */}
-            <Button
+            <NeonButton
               onClick={() => router.push("/")}
-              variant="outline"
+              variant="default"
               className="border-white/10 hover:border-cyan-500/50 hover:bg-cyan-500/10"
             >
               <Home className="w-4 h-4 mr-2" />
               Back to Home
-            </Button>
+            </NeonButton>
 
             {/* Profile Picture Upload */}
             <div className="flex items-center gap-3 glassmorphism p-4 rounded-xl border border-white/10">
@@ -398,26 +399,26 @@ export default function DashboardPage() {
               </div>
 
               <div className="flex flex-col gap-2">
-                <Button
+                <NeonButton
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isUploadingImage}
                   size="sm"
-                  className="bg-gradient-to-r from-purple-500 to-cyan-500 hover:shadow-lg hover:shadow-cyan-500/30"
+                  className="bg-gradient-to-r from-purple-700 to-blue-800 hover:shadow-lg hover:shadow-cyan-500/30"
                 >
                   <Upload className="w-3 h-3 mr-2" />
                   {session?.user?.image ? "Change" : "Upload"}
-                </Button>
+                </NeonButton>
 
                 {session?.user?.image && (
-                  <Button
+                  <NeonButton
                     onClick={handleRemoveImage}
                     disabled={isUploadingImage}
                     size="sm"
-                    variant="outline"
+                    variant="default"
                     className="border-white/10 hover:border-red-500/50 hover:bg-red-500/10 text-red-400"
                   >
                     Remove
-                  </Button>
+                  </NeonButton>
                 )}
               </div>
 

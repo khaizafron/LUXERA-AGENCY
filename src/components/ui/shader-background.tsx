@@ -219,14 +219,14 @@ export default function ShaderBackground({ className = "" }: { className?: strin
   return (
   <div
     ref={canvasRef}
-    className={`absolute inset-0 -z-10 w-full h-full ${className}`}
+    className={`absolute inset-0 -z-10 w-full h-full pointer-events-none ${className}`}
     aria-hidden
   >
       <Canvas
         camera={camera}
         gl={{ antialias: true, alpha: false }}
         dpr={[1, 2]}
-        style={{ width: "100%", height: "100%" }}
+        style={{ width: "100%", height: "100%", pointerEvents: "none" }}
       >
         <ShaderPlane />
       </Canvas>
